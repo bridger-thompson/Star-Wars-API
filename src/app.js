@@ -2,15 +2,13 @@ import React from "react";
 import axios from "axios";
 import Table from './table'
 
-const baseURL = "https://swapi.dev/api/people/?page=1";
-
 export default function App() {
     const [data, setData] = React.useState([]);
-    const [search, setSearch] = React.useState('');
+    const [pageURL, setPageURL] = React.useState("https://swapi.dev/api/people/");
     const [filters, setFilters] = React.useState(false);
 
     const handleSearch = (event) => {
-        setSearch(event.target.value)
+        setPageURL("https://swapi.dev/api/people/?search=" + event.target.value)
     };
 
     const handleFilter = (filter) => {
@@ -18,44 +16,34 @@ export default function App() {
     }
 
     React.useEffect(() => {
-        axios.get(baseURL).then((response) => {
+        axios.get(pageURL).then((response) => {
             console.log(response.data.results);
             setData(response.data.results);
         });
-    }, []);
+    }, [pageURL]);
 
-    const filteredData = {
-        data: data.filter((item) => 
-        item.name.toLowerCase().includes(search.toLowerCase())),
-    };
+    const headers = ['Name', 'Height', 'Mass', 'Gender']
 
-    const columns = React.useMemo(
-        () => [
-            {
-                Header: 'Star Wars Characters',
-                columns: [
-                    {
-                        Header: 'Name',
-                        accessor: 'name',
-                    },
-                    {
-                        Header: 'Height',
-                        accessor: 'height',
-                    },
-                    {
-                        Header: 'Mass',
-                        accessor: 'mass',
-                    },
-                    {
-                        Header: 'Gender',
-                        accessor: 'gender',
-                    },
-                ],
-            },
-        ], []
-    )
+    function PreviousPage() {
+        axios.get(pageURL).then((response) => {
+            if (response.data.previous != null) {
+                console.log(response.data.previous)
+                setPageURL(response.data.previous)
+            }
+        })
+    }
+    
+    function NextPage() {
+        axios.get(pageURL).then((response) => {
+            if (response.data.next != null) {
+                console.log(response.data.next)
+                setPageURL(response.data.next)
+            }
+        })
+    }
 
     return (
+        <>
         <div>
             <label htmlFor="search">
                 Search by Name:
@@ -63,13 +51,24 @@ export default function App() {
             </label>
             <div>
                 <input type="radio" id="male" name="genderFilter" onChange={handleFilter}></input>
-                <label for="male">Male</label>
+                <label>Male</label>
                 <input type="radio" id="female" name="genderFilter" onChange={handleFilter}></input>
-                <label for="male">Female</label>
+                <label>Female</label>
                 <input type="radio" id="n/a" name="genderFilter" onChange={handleFilter}></input>
-                <label for="male">n/a</label>
+                <label>n/a</label>
             </div>
-            <Table columns={columns} data={filteredData.data} />
+            <Table headers={headers} data={data}/>
         </div>
+        <nav aria-label="Table navigation">
+            <ul className="pagination justify-content-end">
+            <li className="page-item">
+                <button type="button" className="btn btn-outline-primary" onClick={PreviousPage}>Previous</button>
+            </li>
+            <li className="page-item">
+                <button type="button" className="btn btn-outline-primary" onClick={NextPage}>Next</button>
+            </li>
+            </ul>
+        </nav>
+        </>
     );
 }
