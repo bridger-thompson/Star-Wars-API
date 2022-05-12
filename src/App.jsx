@@ -1,20 +1,27 @@
 import React from "react";
 import Table from './table';
 import { apiService } from "./apiService";
+import { useQuery } from 'react-query'
 
 export default function App() {
     const [data, setData] = React.useState([]);
     const [pageURL, setPageURL] = React.useState("https://swapi.dev/api/people/");
 
+    const { isFetching } = useQuery([pageURL], () => {
+        apiService
+            .getPeopleArray(pageURL)
+            .then(data => setData(data))
+    })
+
     const handleSearch = (event) => {
         setPageURL("https://swapi.dev/api/people/?search=" + event.target.value)
     };
 
-    React.useEffect(() => {
-        apiService
-            .getPeopleArray(pageURL)
-            .then(data => setData(data))
-    }, [pageURL]);
+    // React.useEffect(() => {
+    //     apiService
+    //         .getPeopleArray(pageURL)
+    //         .then(data => setData(data))
+    // }, [pageURL]);
 
 
     function PreviousPage() {
@@ -48,6 +55,9 @@ export default function App() {
                     </li>
                 </ul>
             </nav>
+            <div>
+                {isFetching ? "Getting data..." : "crap"}
+            </div>
         </>
     );
 }
