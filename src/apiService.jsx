@@ -6,12 +6,18 @@ export const apiService = {
         if (response.data.next != null) {
             return response.data.next;
         }
+        else {
+            return pageURL;
+        }
     },
 
     getPrevUrl: async (pageURL) => {
         const response = await axios.get(pageURL);
         if (response.data.previous != null) {
             return response.data.previous;
+        }
+        else {
+            return pageURL;
         }
     },
 

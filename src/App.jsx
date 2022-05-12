@@ -1,21 +1,21 @@
 import React from "react";
 import Table from './table';
 import { apiService } from "./apiService";
+import { useQuery } from "react-query";
 
 export default function App() {
     const [data, setData] = React.useState([]);
     const [pageURL, setPageURL] = React.useState("https://swapi.dev/api/people/");
 
-    const handleSearch = (event) => {
-        setPageURL("https://swapi.dev/api/people/?search=" + event.target.value)
-    };
-
-    React.useEffect(() => {
+    const { status } = useQuery([pageURL, data], () => {
         apiService
             .getPeopleArray(pageURL)
             .then(data => setData(data))
-    }, [pageURL]);
+    })
 
+    const handleSearch = (event) => {
+        setPageURL("https://swapi.dev/api/people/?search=" + event.target.value)
+    };
 
     function PreviousPage() {
         apiService
@@ -48,6 +48,11 @@ export default function App() {
                     </li>
                 </ul>
             </nav>
+            <div className="status">
+                {status === "loading" ? <p>Fetching data...</p> 
+                : status === "success" ? <p>Data Loaded</p>
+                : <p>Error fetching data</p>}
+            </div>
         </>
     );
 }

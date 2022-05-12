@@ -1,4 +1,5 @@
 import React from "react";
+import { useQuery } from "react-query";
 import { apiService } from "./apiService";
 
 export default function LukeDetails() {
@@ -7,7 +8,7 @@ export default function LukeDetails() {
     const [data, setData] = React.useState("");
     const [homeworldData, setHomeworldData] = React.useState("")
 
-    React.useEffect(() => {
+    const { status } = useQuery([pageURL, homeworldURL, data], () => {
         apiService
             .getHomeworldUrl(pageURL)
             .then(url => setHomeworldURL(url))
@@ -17,8 +18,8 @@ export default function LukeDetails() {
         apiService
             .getObjectDetails(homeworldURL)
             .then(data => setHomeworldData(data))
-    }, [homeworldURL])
-
+    })
+    
     return (
         <div>
             <h1>Hello</h1>
@@ -28,6 +29,11 @@ export default function LukeDetails() {
                 <li>Eye Color: {data.eye_color}</li>
                 <li>Homeworld: {homeworldData.name}</li>
             </ul>
+            <div className="status">
+                {status === "loading" ? <p>Fetching data...</p> 
+                : status === "success" ? <p>Data Loaded</p>
+                : <p>Error fetchng data</p>}
+            </div>
         </div>
     )
     
